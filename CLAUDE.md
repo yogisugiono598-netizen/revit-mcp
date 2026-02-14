@@ -57,6 +57,28 @@ Claude Desktop → MCP Server (this repo, stdio) → TCP Socket → Revit C# Plu
 ### Enhancement #7 — Cleanup (DONE, 2026-02-11)
 - Removed empty/unused files: `modify_element.ts`, `search_modules.ts`, `use_module.ts`, `createWall.ts`
 
+### Enhancement #8 — Tier 1: BIM Coordination & QC (DONE & TESTED, 2026-02-14)
+- **`set_parameter_value_for_elements`** — Bulk parameter edit (same/different values per element)
+- **`get_all_warnings_in_the_model`** — QC automation (severity filter, element IDs, category grouping)
+- **`get_material_layers_from_types`** — Compound structure layers (material, thickness, function)
+- **`get_graphic_overrides_for_element_ids_in_view`** — Read graphic overrides (colors, weights, transparency)
+- Files: `set_parameter_value_for_elements.ts`, `get_all_warnings_in_the_model.ts`, `get_material_layers_from_types.ts`, `get_graphic_overrides_for_element_ids_in_view.ts`
+- C# side: 4 new Command + EventHandler pairs in commandset
+
+### Enhancement #9 — Tier 2: Documentation & Optimization (DONE & TESTED, 2026-02-14)
+- **`get_schedules_info_and_columns`** — Schedule metadata (columns, field types, category)
+- **`set_graphic_overrides_for_elements_in_view`** — Set/reset graphic overrides (colors, weights, transparency, halftone)
+- **`get_size_in_mb_of_families`** — Family file sizes via export (sortable by size/instances/types)
+- **`get_viewports_and_schedules_on_sheets`** — Sheet composition QC (viewports, schedules, view types)
+- Files: `get_schedules_info_and_columns.ts`, `set_graphic_overrides_for_elements_in_view.ts`, `get_size_in_mb_of_families.ts`, `get_viewports_and_schedules_on_sheets.ts`
+- C# side: 4 new Command + EventHandler pairs in commandset
+
+### Enhancement #10 — Tier 3: BIM Authoring (DONE, 2026-02-14)
+- **`create_material`** — Create/update Revit materials (color, transparency, surface/cut fill patterns)
+- **`create_element_type`** — Create new element types by duplicating & customizing (compound layers for wall/floor/roof/ceiling, parameters for column/beam). Supports Indonesian construction standards.
+- Files: `src/tools/create_material.ts`, `src/tools/create_element_type.ts`
+- C# side: 2 new Command + EventHandler pairs in commandset
+
 ## Available Tools
 | Tool | File | Status |
 |------|------|--------|
@@ -83,6 +105,16 @@ Claude Desktop → MCP Server (this repo, stdio) → TCP Socket → Revit C# Plu
 | get_material_quantities | get_material_quantities.ts | NEW (#4) |
 | create_tag | create_tag.ts | NEW (#5) |
 | create_view | create_view.ts | NEW (#6) |
+| set_parameter_value_for_elements | set_parameter_value_for_elements.ts | WORKS (Tested #8) |
+| get_all_warnings_in_the_model | get_all_warnings_in_the_model.ts | WORKS (Tested #8) |
+| get_material_layers_from_types | get_material_layers_from_types.ts | WORKS (Tested #8) |
+| get_graphic_overrides_for_element_ids_in_view | get_graphic_overrides_for_element_ids_in_view.ts | WORKS (Tested #8) |
+| get_schedules_info_and_columns | get_schedules_info_and_columns.ts | WORKS (Tested #9) |
+| set_graphic_overrides_for_elements_in_view | set_graphic_overrides_for_elements_in_view.ts | WORKS (Tested #9) |
+| get_size_in_mb_of_families | get_size_in_mb_of_families.ts | WORKS (Tested #9) |
+| get_viewports_and_schedules_on_sheets | get_viewports_and_schedules_on_sheets.ts | WORKS (Tested #9) |
+| create_material | create_material.ts | NEW (#10) |
+| create_element_type | create_element_type.ts | NEW (#10) |
 
 ## Build & Deploy
 ```bash
@@ -99,6 +131,16 @@ Claude Desktop config references this server in its MCP settings.
 - `src/tools/analyze_model_statistics.ts` — Model statistics extraction
 - `src/tools/export_room_data.ts` — Room data export
 - `src/tools/get_material_quantities.ts` — Material quantity takeoffs
+- `src/tools/set_parameter_value_for_elements.ts` — Bulk parameter editing
+- `src/tools/get_all_warnings_in_the_model.ts` — Model QC warnings
+- `src/tools/get_material_layers_from_types.ts` — Material layer composition
+- `src/tools/get_graphic_overrides_for_element_ids_in_view.ts` — Read graphic overrides
+- `src/tools/get_schedules_info_and_columns.ts` — Schedule metadata
+- `src/tools/set_graphic_overrides_for_elements_in_view.ts` — Set graphic overrides
+- `src/tools/get_size_in_mb_of_families.ts` — Family file sizes
+- `src/tools/get_viewports_and_schedules_on_sheets.ts` — Sheet composition
+- `src/tools/create_material.ts` — Material creation/update with colors and patterns
+- `src/tools/create_element_type.ts` — Element type creation (compound layers / family parameters)
 - `src/connection/SocketClient.ts` — JSON-RPC socket communication
 - `src/connection/ConnectionManager.ts` — Connection lifecycle
 
