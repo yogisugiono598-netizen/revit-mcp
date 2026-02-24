@@ -165,7 +165,16 @@ TYPICAL INDONESIAN CONSTRUCTION:
             errorText += `\nExisting type ID: ${response.existingTypeId}`;
           }
 
-          // Show available families when param failure caused rollback
+          // Show available types for compound types (wall/floor/roof/ceiling)
+          if (response.availableTypes && response.availableTypes.length > 0) {
+            errorText += `\n\nAvailable ${args.category} types in the model:\n`;
+            for (const typeName of response.availableTypes) {
+              errorText += `  - ${typeName}\n`;
+            }
+            errorText += `\nUse one of these as baseTypeName.`;
+          }
+
+          // Show available families for family types (column/beam)
           if (response.availableFamilies && response.availableFamilies.length > 0) {
             errorText += `\n\nAvailable families in the model:\n`;
             for (const fam of response.availableFamilies) {

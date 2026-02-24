@@ -79,6 +79,45 @@ Claude Desktop → MCP Server (this repo, stdio) → TCP Socket → Revit C# Plu
 - Files: `src/tools/create_material.ts`, `src/tools/create_element_type.ts`
 - C# side: 2 new Command + EventHandler pairs in commandset
 
+### Enhancement #11 — Project Standards Configurator + Bug #4 Fix (DONE & TESTED, 2026-02-16)
+- **`get_project_standards`** — Read current project standards (units, dimensions, text, lines, structural, naming, sheets)
+- **`configure_project_standards`** — Configure project standards with presets (SNI_Indonesia, British_Standard, US_ACI_AISC, Eurocode) or custom settings. Supports preset + override pattern.
+- **Bug #4 Fix** — `create_element_type` now returns explicit error when baseTypeName not found (instead of silent fallback)
+- Files: `src/tools/get_project_standards.ts`, `src/tools/configure_project_standards.ts`
+- C# side: 2 new Command + EventHandler pairs in commandset (Configuration folder)
+- **Test Results (2026-02-16):** Score **7.5/10**
+  - Preset apply batch (16 changes sekaligus): 9/10
+  - Preset switching bidirectional + idempotent materials: 9/10
+  - Custom override (preset + override pattern): 8/10
+  - Error handling (create_element_type): 7/10 — Column excellent, Wall incomplete
+  - Text type management: 4/10 — Bug B1 (flat sizes)
+
+### Enhancement #12 — Major Update: Tier 2 + Tier 3 (BUILT, 2026-02-18)
+- **Bug Fix B5**: `get_available_family_types` async queue fixed — added `SetParameters()` with `_resetEvent.Reset()`
+- **10 Tier 2 tools** (closing ZedMoster gap):
+  - `create_level` — Batch levels + auto floor plan views + SNI naming
+  - `create_room` — Batch rooms with name/number/department
+  - `create_room_tag` — Batch tag all rooms with area
+  - `create_room_separation_line` — Room boundary lines for open plan
+  - `create_sheet` — Batch sheets with title blocks + SNI numbering
+  - `create_floor_plan_view` — Floor plan views per level + view template
+  - `create_family_instance` — Place furniture/fixtures/equipment
+  - `move_elements` — Dedicated move/copy tool (simpler than operate_element)
+  - `update_elements` — Batch update type, level, parameters
+  - `link_dwg` — Link/import DWG as underlay
+- **10 Tier 3 tools** (beyond all competitors):
+  - `place_viewport_on_sheet` — Place views on sheets for documentation
+  - `apply_view_template` — Apply templates for visual consistency
+  - `create_schedule` — Door/window/room/material schedules for BOQ
+  - `load_family` — Load .rfa family files into project
+  - `export_to_pdf` — Batch PDF export with naming convention
+  - `create_legend` — Legend views for references
+  - `validate_code_compliance` — SNI/IBC/BS building code validation
+  - `generate_rab_takeoff` — Indonesian RAB cost estimation (12 categories)
+  - `create_section_view` — Section views with auto crop
+  - `batch_create_building` — One-command complete building generation
+- **Total tools: 55** (was 35)
+
 ## Available Tools
 | Tool | File | Status |
 |------|------|--------|
@@ -115,6 +154,41 @@ Claude Desktop → MCP Server (this repo, stdio) → TCP Socket → Revit C# Plu
 | get_viewports_and_schedules_on_sheets | get_viewports_and_schedules_on_sheets.ts | WORKS (Tested #9) |
 | create_material | create_material.ts | NEW (#10) |
 | create_element_type | create_element_type.ts | NEW (#10) |
+| get_project_standards | get_project_standards.ts | WORKS (Tested #11) |
+| configure_project_standards | configure_project_standards.ts | WORKS (Tested #11) |
+| create_level | create_level.ts | NEW (#12 Tier 2) |
+| create_room | create_room.ts | NEW (#12 Tier 2) |
+| create_room_tag | create_room_tag.ts | NEW (#12 Tier 2) |
+| create_room_separation_line | create_room_separation_line.ts | NEW (#12 Tier 2) |
+| create_sheet | create_sheet.ts | NEW (#12 Tier 2) |
+| create_floor_plan_view | create_floor_plan_view.ts | NEW (#12 Tier 2) |
+| create_family_instance | create_family_instance.ts | NEW (#12 Tier 2) |
+| move_elements | move_elements.ts | NEW (#12 Tier 2) |
+| update_elements | update_elements.ts | NEW (#12 Tier 2) |
+| link_dwg | link_dwg.ts | NEW (#12 Tier 2) |
+| place_viewport_on_sheet | place_viewport_on_sheet.ts | NEW (#12 Tier 3) |
+| apply_view_template | apply_view_template.ts | NEW (#12 Tier 3) |
+| create_schedule | create_schedule.ts | NEW (#12 Tier 3) |
+| load_family | load_family.ts | NEW (#12 Tier 3) |
+| export_to_pdf | export_to_pdf.ts | NEW (#12 Tier 3) |
+| create_legend | create_legend.ts | NEW (#12 Tier 3) |
+| validate_code_compliance | validate_code_compliance.ts | NEW (#12 Tier 3) |
+| generate_rab_takeoff | generate_rab_takeoff.ts | NEW (#12 Tier 3) |
+| create_section_view | create_section_view.ts | NEW (#12 Tier 3) |
+| batch_create_building | batch_create_building.ts | NEW (#12 Tier 3) |
+
+## Known Bugs / Backlog
+
+| # | Severity | Tool | Deskripsi | Status |
+|---|----------|------|-----------|--------|
+| B1 | 🟡 Medium | `configure_project_standards` | **Text sizes jadi flat** — Fixed: keyword + size-proximity matching. Retest: works for types near target sizes. Note 2mm not applied jika tidak ada type dengan keyword "note". Known limitation. | FIXED 2026-02-16 ✅ Retested |
+| B2 | 🟢 Low | `configure_project_standards` | **Dimension font terpisah dari text font** — Fixed: `text.font` cascade ke dimensions. | FIXED 2026-02-16 ✅ Retested |
+| B3 | 🟢 Low | `create_element_type` | **Wall error response kosong** — Fixed: menampilkan 20 available wall types. | FIXED 2026-02-16 ✅ Retested |
+| B4 | ℹ️ Info | `configure_project_standards` | **Rebar D22/D25** — Already in C# preset. Display capped by B5. | N/A (already in code) |
+| B5 | 🟢 Low | `get_project_standards` | **Structural materials display cap 30** — Response capped di 30 items sehingga D22 & D25 tidak muncul meski sudah dibuat | OPEN |
+| B5-async | 🔴 Critical | `get_available_family_types` | **Async queue bug** — _resetEvent never reset between calls, 2nd call returns stale result. Fixed: added SetParameters() with _resetEvent.Reset() | FIXED 2026-02-18 ✅ |
+
+**B1-B4 fixed 2026-02-16, B5-async fixed 2026-02-18.** Perlu restart Revit + Claude Desktop untuk load perubahan.
 
 ## Build & Deploy
 ```bash
