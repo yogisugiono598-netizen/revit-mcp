@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
+import { feetToMm, formatNum } from "../utils/unitConversion.js";
 
 export function registerAnalyzeModelStatisticsTool(server: McpServer) {
   server.tool(
@@ -57,7 +58,8 @@ export function registerAnalyzeModelStatisticsTool(server: McpServer) {
           if (response.levels && response.levels.length > 0) {
             resultText += `\n## Levels (${response.levels.length})\n`;
             for (const lvl of response.levels) {
-              resultText += `- ${lvl.levelName}: elevation ${lvl.elevation}mm, ${lvl.elementCount} elements\n`;
+              const elevMm = formatNum(feetToMm(lvl.elevation));
+              resultText += `- ${lvl.levelName}: elevation ${elevMm}mm, ${lvl.elementCount} elements\n`;
             }
           }
 

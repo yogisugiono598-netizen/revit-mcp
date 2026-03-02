@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
+import { convertResponseCoordinates } from "../utils/unitConversion.js";
 
 export function registerTagAllWallsTool(server: McpServer) {
   server.tool(
@@ -23,12 +24,14 @@ export function registerTagAllWallsTool(server: McpServer) {
         const response = await withRevitConnection(async (revitClient) => {
           return await revitClient.sendCommand("tag_all_walls", params);
         });
-        
+
+        const convertedResponse = convertResponseCoordinates(response);
+
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify(response, null, 2),
+              text: JSON.stringify(convertedResponse, null, 2),
             },
           ],
         };

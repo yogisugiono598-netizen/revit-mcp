@@ -28,7 +28,7 @@ export function registerCreateSectionViewTool(server: McpServer) {
       height: z
         .number()
         .optional()
-        .describe("Section crop height in millimeters. If not provided, auto-calculated from model extents"),
+        .describe("Section crop height in millimeters. Default: 15000mm (15m). If not provided, uses 15000mm instead of auto-calculating from full model extents which can result in excessively large sections."),
       scale: z
         .number()
         .int()
@@ -42,11 +42,11 @@ export function registerCreateSectionViewTool(server: McpServer) {
         .describe("View template element ID to apply to the section view"),
     },
     async (args, extra) => {
-      const params = args;
+      const finalParams = { ...args, height: args.height ?? 15000 };
 
       try {
         const response = await withRevitConnection(async (revitClient) => {
-          return await revitClient.sendCommand("create_section_view", params);
+          return await revitClient.sendCommand("create_section_view", finalParams);
         });
 
         return {

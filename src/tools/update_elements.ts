@@ -40,14 +40,47 @@ export function registerUpdateElementsTool(server: McpServer) {
           })
         )
         .describe("Array of element update definitions"),
+      returnChanges: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe("Request that the C# plugin return before/after values for changed parameters. Default: true"),
     },
     async (args, extra) => {
-      const params = args;
+      const finalParams = { ...args, returnChanges: true };
 
       try {
         const response = await withRevitConnection(async (revitClient) => {
-          return await revitClient.sendCommand("update_elements", params);
+          return await revitClient.sendCommand("update_elements", finalParams);
         });
+
+        if (response.success && Array.isArray(response.results)) {
+          let resultText = `# Update Results\n\n`;
+          resultText += `- Success: ${response.success}\n`;
+          resultText += `- Updated: ${response.updatedCount || response.results?.length || 0} elements\n\n`;
+          if (response.results) {
+            for (const result of response.results) {
+              resultText += `## Element ${result.elementId}\n`;
+              resultText += `- Status: ${result.success ? 'Updated' : 'Failed'}\n`;
+              if (result.message) resultText += `- Message: ${result.message}\n`;
+              if (result.changes && result.changes.length > 0) {
+                for (const change of result.changes) {
+                  resultText += `  - ${change.parameter}: ${change.oldValue} \u2192 ${change.newValue}\n`;
+                }
+              }
+              resultText += `\n`;
+            }
+          }
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: resultText,
+              },
+            ],
+          };
+        }
 
         return {
           content: [

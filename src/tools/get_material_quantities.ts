@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
+import { sqFeetToSqM, cuFeetToCuM, formatNum } from "../utils/unitConversion.js";
 
 export function registerGetMaterialQuantitiesTool(server: McpServer) {
   server.tool(
     "get_material_quantities",
-    "Get material quantity takeoffs from the current Revit model. Returns material names, areas, volumes, and element counts. Can filter by categories or selected elements only. Useful for cost estimation, material scheduling, and quantity surveying.",
+    "Get material quantity takeoffs from the current Revit model. Returns material names, areas (m²), volumes (m³), and element counts. Can filter by categories or selected elements only. Useful for cost estimation, material scheduling, and quantity surveying.",
     {
       categoryFilters: z
         .array(z.string())
@@ -36,16 +37,21 @@ export function registerGetMaterialQuantitiesTool(server: McpServer) {
         });
 
         if (response.success) {
+          const totalAreaM2 = formatNum(sqFeetToSqM(response.totalArea));
+          const totalVolM3 = formatNum(cuFeetToCuM(response.totalVolume), 3);
+
           let resultText = `# Material Quantities\n\n`;
           resultText += `- Total Materials: ${response.totalMaterials}\n`;
-          resultText += `- Total Area: ${response.totalArea} sq ft\n`;
-          resultText += `- Total Volume: ${response.totalVolume} cu ft\n\n`;
+          resultText += `- Total Area: ${totalAreaM2} m²\n`;
+          resultText += `- Total Volume: ${totalVolM3} m³\n\n`;
 
           if (response.materials && response.materials.length > 0) {
             for (const mat of response.materials) {
+              const areaM2 = formatNum(sqFeetToSqM(mat.area));
+              const volM3 = formatNum(cuFeetToCuM(mat.volume), 3);
               resultText += `## ${mat.materialName}\n`;
               resultText += `- Class: ${mat.materialClass}\n`;
-              resultText += `- Area: ${mat.area} sq ft | Volume: ${mat.volume} cu ft\n`;
+              resultText += `- Area: ${areaM2} m² | Volume: ${volM3} m³\n`;
               resultText += `- Used in ${mat.elementCount} elements\n`;
               resultText += `\n`;
             }

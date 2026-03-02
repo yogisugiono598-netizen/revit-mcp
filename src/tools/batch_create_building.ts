@@ -78,6 +78,14 @@ export function registerBatchCreateBuildingTool(server: McpServer) {
         .optional()
         .default(true)
         .describe("Automatically generate floor slabs at each level. Default: true"),
+      originOffset: z
+        .object({
+          x: z.number().describe("X offset from project origin in millimeters"),
+          y: z.number().describe("Y offset from project origin in millimeters"),
+        })
+        .optional()
+        .default({ x: 0, y: 0 })
+        .describe("Origin offset for the building placement. Use to avoid overlap with existing geometry. Default: {x: 0, y: 0}"),
     },
     async (args, extra) => {
       const params = args;

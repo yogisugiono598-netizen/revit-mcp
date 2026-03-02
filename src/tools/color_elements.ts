@@ -12,7 +12,11 @@ export function registerColorElementsTool(server: McpServer) {
             .describe("The name of the Revit category to color (e.g., 'Walls', 'Doors', 'Rooms')"),
         parameterName: z
             .string()
-            .describe("The name of the parameter to use for grouping and coloring elements"),
+            .describe("The name of the parameter to use for grouping and coloring elements. Common names: 'Type Name' (may not work on some Revit versions), 'Family and Type', 'Type', 'Family Name', 'Mark', 'Comments'. If grouping returns all elements as 'None', try a different parameter name."),
+        useBuiltInParameter: z
+            .boolean()
+            .optional()
+            .describe("If true, use Revit BuiltInParameter enum for parameter lookup instead of string name matching. Recommended for 'Type Name' lookups."),
         useGradient: z
             .boolean()
             .optional()
@@ -30,7 +34,13 @@ export function registerColorElementsTool(server: McpServer) {
             .describe("Optional array of custom RGB colors to use for specific parameter values"),
       },
       async (args, extra) => {
-        const params = args;
+        const params = {
+          categoryName: args.categoryName,
+          parameterName: args.parameterName,
+          useBuiltInParameter: args.useBuiltInParameter,
+          useGradient: args.useGradient,
+          customColors: args.customColors,
+        };
         try {
           const response = await withRevitConnection(async (revitClient) => {
             return await revitClient.sendCommand("color_splash", params);

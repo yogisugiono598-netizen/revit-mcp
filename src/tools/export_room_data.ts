@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
+import { sqFeetToSqM, cuFeetToCuM, feetToM, formatNum } from "../utils/unitConversion.js";
 
 export function registerExportRoomDataTool(server: McpServer) {
   server.tool(
@@ -36,14 +37,14 @@ export function registerExportRoomDataTool(server: McpServer) {
         if (response.success) {
           let resultText = `# Room Data Export\n\n`;
           resultText += `- Total Rooms: ${response.totalRooms}\n`;
-          resultText += `- Total Area: ${response.totalArea} sq ft\n\n`;
+          resultText += `- Total Area: ${formatNum(sqFeetToSqM(response.totalArea))} m\u00B2\n\n`;
 
           if (response.rooms && response.rooms.length > 0) {
             for (const room of response.rooms) {
               resultText += `## ${room.name} (${room.number})\n`;
               resultText += `- ID: ${room.id} | Level: ${room.level}\n`;
-              resultText += `- Area: ${room.area} sq ft | Volume: ${room.volume} cu ft\n`;
-              resultText += `- Perimeter: ${room.perimeter} ft | Height: ${room.unboundedHeight} ft\n`;
+              resultText += `- Area: ${formatNum(sqFeetToSqM(room.area))} m\u00B2 | Volume: ${formatNum(cuFeetToCuM(room.volume))} m\u00B3\n`;
+              resultText += `- Perimeter: ${formatNum(feetToM(room.perimeter))} m | Height: ${formatNum(feetToM(room.unboundedHeight))} m\n`;
               if (room.department) resultText += `- Department: ${room.department}\n`;
               if (room.phase) resultText += `- Phase: ${room.phase}\n`;
               if (room.comments) resultText += `- Comments: ${room.comments}\n`;

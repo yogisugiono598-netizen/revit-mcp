@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
+import { convertResponseCoordinates, translateResponse } from "../utils/unitConversion.js";
 
 export function registerValidateCodeComplianceTool(server: McpServer) {
   server.tool(
@@ -18,20 +19,32 @@ export function registerValidateCodeComplianceTool(server: McpServer) {
         .optional()
         .default("SNI")
         .describe("Building code standard to validate against: SNI (Indonesian), IBC (International Building Code), BS (British Standard). Default: SNI"),
+      useBuiltInParams: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe("Use BuiltInParameter enum for reading element dimensions. Recommended for accurate door width, room area readings."),
     },
     async (args, extra) => {
-      const params = args;
+      const params = {
+        checks: args.checks,
+        standard: args.standard,
+        useBuiltInParams: args.useBuiltInParams ?? true,
+      };
 
       try {
         const response = await withRevitConnection(async (revitClient) => {
           return await revitClient.sendCommand("validate_code_compliance", params);
         });
 
+        const translatedResponse = translateResponse(response);
+        const convertedResponse = convertResponseCoordinates(translatedResponse);
+
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify(response, null, 2),
+              text: JSON.stringify(convertedResponse, null, 2),
             },
           ],
         };

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
+import { translateResponse } from "../utils/unitConversion.js";
 
 export function registerCreatePointBasedElementTool(server: McpServer) {
   server.tool(
@@ -35,6 +36,10 @@ export function registerCreatePointBasedElementTool(server: McpServer) {
               .number()
               .optional()
               .describe("Rotation angle in degrees (0-360)"),
+            wallJoinOffset: z
+              .number()
+              .optional()
+              .describe("Offset distance in mm from wall joins/corners to avoid placement conflicts. Default: 100mm if placing doors/windows near wall joins."),
           })
         )
         .describe("Array of point-based elements to create"),
@@ -50,11 +55,13 @@ export function registerCreatePointBasedElementTool(server: McpServer) {
           );
         });
 
+        const translatedResponse = translateResponse(response);
+
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify(response, null, 2),
+              text: JSON.stringify(translatedResponse, null, 2),
             },
           ],
         };
